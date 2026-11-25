@@ -33,7 +33,7 @@ QUESTIONS = EVAL / "questions.csv"
 ANSWERS = EVAL / "answers.jsonl"
 VERDICTS = EVAL / "verdicts.jsonl"
 HUMAN = EVAL / "human_labels.csv"
-DESIGNS = ["fixed", "article", "article_hybrid", "article_routed"]
+DESIGNS = ["fixed", "article", "article_hybrid", "article_bm25", "article_routed"]
 KS = (1, 3, 5)
 JUDGE_MODEL = "gemini-3.5-flash-lite"   # gemini-3.5-flash free tier is 20 requests/day; see REPORT
 FRESH = os.environ.get("FRESH") == "1"

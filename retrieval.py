@@ -5,6 +5,7 @@ Designs:
   fixed            dense search over 300-word windows
   article          dense search over article chunks
   article_hybrid   article chunks, dense + BM25 merged with reciprocal rank fusion
+  article_bm25     article chunks, keyword (BM25) only, as a check on why hybrid lost
   article_routed   article chunks, dense, but an explicit "Article N" (with the act's
                    name, if given) in the query filters those chunks to the top
 
@@ -106,7 +107,9 @@ def search(query: str, k: int = 5, design: str = DEFAULT_DESIGN) -> list[dict]:
     chunking = "fixed" if design == "fixed" else "article"
     idx = get_index(chunking)
     dense = idx.dense(embed_query(query))
-    if design == "article_routed":
+    if design == "article_bm25":
+        score = idx.bm25.scores(query)
+    elif design == "article_routed":
         refs = article_refs(query)
         boost = np.array([1.0 if any(a in c["articles"] and (s is None or s == c["source"]) for s, a in refs) else 0.0
                           for c in idx.chunks])

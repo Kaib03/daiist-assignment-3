@@ -7,6 +7,7 @@
 | fixed | 0.41 | 0.62 | 0.75 | 0.84 | 0.43 | 1527 |
 | article | 0.56 | 0.78 | 0.91 | 0.96 | 0.71 | 1019 |
 | article_hybrid | 0.31 | 0.47 | 0.59 | 0.68 | 0.29 | 1153 |
+| article_bm25 | 0.16 | 0.22 | 0.25 | 0.32 | 0.00 | 1186 |
 | article_routed | 0.56 | 0.78 | 0.91 | 0.96 | 0.71 | 1019 |
 
 Served design: article. Answerable questions: 32.

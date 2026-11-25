@@ -64,11 +64,12 @@ A hit means a top-k chunk is from the expected act and covers the expected artic
 | fixed | 0.41 | 0.62 | 0.75 | 0.84 | 0.43 | 1,527 |
 | article | 0.56 | 0.78 | 0.91 | 0.96 | 0.71 | 1,019 |
 | article_hybrid (dense + BM25, RRF) | 0.31 | 0.47 | 0.59 | 0.68 | 0.29 | 1,153 |
+| article_bm25 (keyword only, a check on hybrid) | 0.16 | 0.22 | 0.25 | 0.32 | 0.00 | 1,186 |
 | article_routed ("Article N" in the query pulls that article up) | 0.56 | 0.78 | 0.91 | 0.96 | 0.71 | 1,019 |
 
 Article chunks beat fixed windows at every k, and they put about a third fewer words in the prompt. Fixed windows cut an obligation in half or glue the end of one article to the start of the next, so the chunk that matches the question often doesn't hold the whole rule.
 
-Hybrid was the worst, which I didn't expect, so I ran BM25 on its own to see why. Alone it gets 0.25 at hit@5. Its favourite results are short chunks that happen to share an everyday word with the question: ePrivacy Article 9 shows up in the top 5 for 12 of the 32 questions, and "A student emailed asking for a copy of everything we hold on them" pulls ePrivacy's email marketing rules and DSA Article 25 instead of GDPR Article 12. My users ask in everyday words and the law uses its own, and the embedding bridges that gap where keyword matching can't. Fusing a ranking that weak into the dense one dragged the right article down.
+Hybrid was the worst, which I didn't expect, so I ran BM25 on its own to see why (the article_bm25 row). Alone it gets 0.25 at hit@5. Its favourite results are short chunks that happen to share an everyday word with the question: ePrivacy Article 9 shows up in the top 5 for 12 of the 32 questions, and "A student emailed asking for a copy of everything we hold on them" pulls ePrivacy's email marketing rules and DSA Article 25 instead of GDPR Article 12. My users ask in everyday words and the law uses its own, and the embedding bridges that gap where keyword matching can't. Fusing a ranking that weak into the dense one dragged the right article down.
 
 Routing tied with plain article chunks because only two questions name an article, and plain search already finds both. So I serve plain article chunks. The extra rule isn't earning anything on my test set.
 
@@ -167,8 +168,9 @@ As a stand-in until then, I had a different model (Claude) grade the same 20 ans
 | | Run 1 | Run 2 |
 |---|---|---|
 | Correct, answerable (judge) | 25/32 | 29/32 |
+| Correct, answerable (stricter, second grader on its 20) | n/a | 27/32 |
 | Unsupported answers (judge) | 0/40 | 2/40 |
-| Correct refusals (code) | 6/8 | 7/8 |
+| Correct refusals (code, new check) | 8/8 | 7/8 |
 | Wrong refusals (code) | 2/32 | 1/32 |
 | Citations all valid | 40/40 | 40/40 |
 | Guardrail fired | 2 | 1 |
@@ -181,7 +183,7 @@ Between the runs I changed five things, all picked after reading run 1's failure
 4. the code's refusal check, which now counts "the corpus does not cover" (or "state", "specify" and similar) anywhere in the answer instead of only at the start
 5. the served design, from article_routed to article (identical retrieval scores, so probably harmless)
 
-So run 2 is optimistic. I tuned on the test, and only fresh questions would show whether the gain is real. I also never reran run 2 unchanged, so I don't know how much a rerun moves the score by itself. And q24 was right in run 1 and became a wrong refusal in run 2, so at least one fix broke something. Tuning didn't only add. The refusal-check change also means the two runs' refusal counts aren't measured in exactly the same way.
+So run 2 is optimistic. I tuned on the test, and only fresh questions would show whether the gain is real. I also never reran run 2 unchanged, so I don't know how much a rerun moves the score by itself. And q24 was right in run 1 and became a wrong refusal in run 2, so at least one fix broke something. Rescored with the new refusal check, run 1 gets 8/8 refusals, so run 2 also got worse on q39: run 1 said the corpus can't settle "the public" and run 2 answered with its own reading.
 
 ## Failures
 
@@ -197,7 +199,7 @@ My hand classification of run 2, from reading each answer against the reference 
 
 q24 is counted twice because it failed in two ways. On top of these, the second grader's notes point to smaller overstatements in answers the judge passed (q11, q13, q29, q33). Those don't change the conclusion of the answer, but a moderator reading "you must" where the law says "as appropriate" would act on a stronger duty than the one that exists.
 
-The code's first guess called q37 an "unsupported claim", and I think that's wrong. The answer says the corpus doesn't specify a fixed number of hours and then gives DSA Article 6's "act expeditiously" with a citation, which is my reference answer, and both the judge and the second grader marked it correct. My refusal check looked for "does not cover", "does not state" and "does not say", so it missed "does not specify". That's a measurement bug, not an agent failure. I fixed the check and recomputed from the saved answers (no new model calls), and correct refusals went to 7/8.
+The code's first guess called q37 an "unsupported claim", and I think that's wrong. The answer says the corpus doesn't specify a fixed number of hours and then gives DSA Article 6's "act expeditiously" with a citation, which is my reference answer, and both the judge and the second grader marked it correct. My refusal check looked for "does not cover", "does not state" and "does not say", so it missed "does not specify". That's a measurement bug, not an agent failure. I fixed the check and recomputed from the saved answers (no new model calls), and correct refusals went to 7/8. The new check is looser, though. An answer that says "does not cover" once and then answers anyway would pass, so I read the unanswerable answers by hand too.
 
 What I'd fix first is exemptions. Four of the seven multi questions (q27, q28, q29, q32) hinge on Article 19, plus q17, and q28 still missed it in run 2 because the agent searched once. I'd force a second search whenever a retrieved article sits in DSA Articles 20 to 28, and put the section number in the chunk header so "Section 3" is in the text and the model can't make up "Section 2". Second, I'd add a rule to keep the law's own qualifiers ("as appropriate", "where", "unless") word for word.
 
@@ -205,7 +207,7 @@ What I'd fix first is exemptions. Four of the seven multi questions (q27, q28, q
 
 I'd let our moderators and devs rely on it for a first pass: which article applies to this situation and what does it say, with the citations right there to click. It's mostly right on single-article questions, though it sometimes states a duty more strongly than the law does, and it's good at saying when something isn't covered.
 
-I wouldn't let anyone act on it alone when the answer hinges on whether an exemption applies to us (Article 19 and friends). That's where it fails most, and a wrong call there costs the most. q28 is the example: it told us we "must" follow Article 28 when we're exempt. I also wouldn't use it for a regulator letter, a police order or a court order without a lawyer, and the agent already says so in those cases. And because the judge is lenient on support, whoever reads an answer should click the citation before acting on a "you must".
+I wouldn't let anyone act on it alone when the answer hinges on whether an exemption applies to us (Article 19 and friends). That's where it fails most, and where a wrong call hurts. q28 is the example: it told us we "must" follow Article 28 when we're exempt. I also wouldn't use it for a regulator letter, a police order or a court order without a lawyer, and the agent already says so in those cases. And because the judge is lenient on support, whoever reads an answer should click the citation before acting on a "you must".
 
 The safeguards I'd keep:
 
