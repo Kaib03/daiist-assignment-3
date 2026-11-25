@@ -255,10 +255,8 @@ Cost per question in run 2: 5,354 input and 143 output tokens and 1.4 tool calls
 
 ## AI use
 
-I used Claude (Anthropic) throughout. It wrote the code (`index.py`, `retrieval.py`, `server.py`, `agent.py`, `evaluate.py`, the demo script), ran the indexing and the evaluations, and found the EU Publications Office route when EUR-Lex blocked downloads.
+I used Claude Code as a coding assistant. Under my direction it wrote most of the code (indexing, retrieval, the MCP server, the agent and the evaluation), ran the pipeline and drafted this report from the results, which I then edited.
 
-For the test set, I gave an AI agent a prompt with talks.' features and my criteria, it drafted 45 candidates, and a second agent checked each against the law. I set the criteria, cut the dating questions and approved the final 40.
+The thinking is mine. I chose the use case, the corpus and the articles-only cut, and decided to refuse rather than guess. I set the rubric, chose which fixes to make after run 1, graded the 20 answers by hand and made the ship decision.
 
-Claude also drafted this report from the eval files, and I edited it. The 20 human grades are my own.
-
-The decisions are mine: the use case and corpus, indexing articles only, serving plain article chunks, refusing over guessing, the rubric, the fixes after run 1 and the ship decision.
+For the test set, I gave an AI agent the talks. context and my criteria to draft candidates, a second agent checked them against the law, and I cut and approved the final 40.
