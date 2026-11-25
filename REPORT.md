@@ -1,8 +1,8 @@
 # Assignment 3 Report
 
 - **Name**: Samer Roz
-- **Student ID**: TODO
-- **Group**: TODO (BBADBA 5A or 5B)
+- **Student ID**: 19583
+- **Group**: BBADBA Group A
 
 ## Use case
 
@@ -100,10 +100,43 @@ The subagent (`.claude/agents/corpus-researcher.md`) can only use `mcp__corpus__
 Transcript from Claude Code:
 
 ```
-TRANSCRIPT TO PASTE
-(run in the repo: claude, then "Use the corpus-researcher subagent: a user reported a post as
-defamatory, what do we have to do?" and paste the full exchange here)
+❯ Use the corpus-researcher subagent: a user reported a post as defamatory, what do we have to do?
+
+I'll delegate this to the corpus-researcher subagent to check what the indexed EU law texts require.
+
+⏺ corpus-researcher(Research defamation report duties)
+Backgrounded agent (↓ nd)
+Allowed by auto mode classifier
+
+The corpus-researcher aged legal texts now — I'llreport back with its findings when it completes.
+
+✻ Waiting for 1 background agent to finish
+
+⏺ Agent "Research defamation report duties" finished · 30s
+
+The corpus-researcher came back with a clear answer from the indexed DSA text. Here's what we have to dot as defamatory:
+
+1. Receive the notice proting mechanism must be easy to access and electronic, and must let the reporter submit a sufficiently
+substantiated explanationl, the exact URL(s), theirname and email, and a good-faith accuracy statement. If they gave contact
+details, we must send a chout undue delay.
+
+2. Decide on it diligentle to process the notice ina "timely, diligent, non-arbitrary and objective manner", tell the reporter
+our decision along with tdisclose whether we usedautomated means.
+
+3. If we remove or restrict the post, give the poster a statement of reasons (Art. 17). It must be cleure we took and itsscope/duration, the facts (including that it followed an Article 16 notice),
+any automation involved, he content is consideredillegal, and information about redress.
+
+4. Offer redress to both sides (Arts. 20–21). Both the poster and the reporter get a free, electronic inr at least six months —covering decisions to act and not to act — handled by qualified staff, not   solely by automation. Eit certified out-of-courtdispute settlement body, without losing the right to go to court.
+5. Mind the liability clock (Arts. 6–8). A sufficiently precise notice gives us "actual knowledge" of  means we keep the hostingliability exemption only if we act expeditiously to remove or disable access once we know. Good-faith ost us the exemption, andno one can impose general monitoring on us.
+
+6. Priority handling for trusted flaggers (Art. 22). If the report came from certified trusted flagger decided without unduedelay, ahead of ordinary notices.
+One practical nuance: the DSA doesn't force us to decide whether the post is actually defamatory under deadline, but the momentthe notice is precise enough to create "actual knowledge," our liability     shield depends on acting e workflow is: confirmreceipt → assess promptly → act or decline with reasons → notify both partieswith redress info.
+                                                                             Citations from the corpus10 (liability), 0024/0025(notice-and-action), 0026–0028 (statement of reasons), 0031–0033 (complaints and dispute settlement),
 ```
+
+(Copied as it came out of my terminal. Some words got cut where the window wrapped lines.)
+
+Points 1, 2, 3 and 5 are right and match my reference answer for q14. But points 4 and 6 are the same mistake my agent makes in the evaluation. Articles 20 to 22 are online platform duties in Section 3, and Article 19 switches them off for a micro company like talks. The subagent never searched for the exemption, because the subagent's instructions don't tell it we're a micro company (only AGENTS.md does). So the editor path has the same weak spot as the agent, and the fix is the same: put the company facts and the exemption check in the subagent's instructions too.
 
 ## Adding a document
 
