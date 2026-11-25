@@ -223,20 +223,6 @@ def read_human() -> dict[str, dict]:
         return {r["id"].strip(): r for r in csv.DictReader(f) if (r.get("id") or "").strip()}
 
 
-def ai_second_grader_lines(results: list[dict]) -> list[str]:
-    """Agreement between the judge and an independent AI grader (NOT a human check)."""
-    path = EVAL / "ai_second_grader.csv"
-    if not path.exists():
-        return []
-    with path.open(newline="", encoding="utf-8") as f:
-        ai = {r["id"].strip(): r for r in csv.DictReader(f)}
-    rows = [r for r in results if r["id"] in ai]
-    c = sum(int(ai[r["id"]]["correct"]) == r["judge_correct"] for r in rows)
-    s = sum(int(ai[r["id"]]["supported"]) == r["judge_supported"] for r in rows)
-    return ["## Judge vs an independent AI grader (not a human check)", "",
-            f"- Questions: {len(rows)}; agreement on correct {c}/{len(rows)}, on supported {s}/{len(rows)}"]
-
-
 def failure_cause(q: dict, checks: dict, v: dict) -> str:
     """First guess at the cause; checked by hand in REPORT.md."""
     if q["kind"] == "unanswerable":
@@ -308,7 +294,7 @@ def main() -> None:
               f"- Graded by hand: {len(graded)}",
               f"- Agreement on correct: {agree_c}/{len(graded)}" if graded else "- No human labels yet",
               f"- Agreement on supported: {agree_s}/{len(graded)}" if graded else "",
-              ""] + ai_second_grader_lines(results) + ["", "## Failures (first guess by code)", ""]
+              "", "## Failures (first guess by code)", ""]
     lines += [f"- {k}: {v}" for k, v in sorted(causes.items(), key=lambda x: -x[1])] or ["- none"]
     sec = [r["seconds"] for r in results]
     tin = [r["tokens_in"] for r in results]

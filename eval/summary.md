@@ -24,13 +24,9 @@ Served design: article. Answerable questions: 32.
 
 ## Judge vs human
 
-- Graded by hand: 0
-- No human labels yet
-
-
-## Judge vs an independent AI grader (not a human check)
-
-- Questions: 20; agreement on correct 18/20, on supported 14/20
+- Graded by hand: 20
+- Agreement on correct: 16/20
+- Agreement on supported: 19/20
 
 ## Failures (first guess by code)
 

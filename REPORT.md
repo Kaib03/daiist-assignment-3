@@ -161,14 +161,14 @@ The judge grades two things with my rubric. Correct: it states the substance of 
 
 Judge model: I planned gemini-3.5-flash, but its free tier allows 20 requests a day and testing used them up. So the judge is gemini-3.5-flash-lite, the same model as the agent. A model grading its own family can go easy on it, and I found one case by hand: in q27 the judge marked as correct an answer that puts the exemption in "Section 2" of the DSA, when Article 19 sits in Section 3.
 
-Agreement with me: PENDING. My 20 blind grades (odd ids, q01 to q39) go in `eval/human_labels.csv`, and `evaluate.py` recomputes agreement from that file.
+Agreement with me: I graded 20 answers (every odd id, q01 to q39) without the judge's verdicts in front of me, in `eval/human_labels.csv`. The judge agreed with me on correct for 16 of 20 and on supported for 19 of 20.
 
-As a stand-in until then, I had a different model (Claude) grade the same 20 answers blind to the judge, with the same rubric, in `eval/ai_second_grader.csv`. This is not a human check. It agreed with the judge on correct for 18 of 20, but on supported only 14 of 20. It marked 7 of the 20 as unsupported, where the judge marked 2 of all 40. Reading its notes, the pattern is real: answers overstate the source. They turn an "as appropriate" security measure into a hard duty (q11), present the condition for keeping the liability exemption as a standalone duty to remove (q13), and talk about "Section 3" when the chunk only says "this Section" (q29). So I don't trust the judge's 2/40 unsupported number. It's lenient on correctness too: the second grader failed q17 and q27, which the judge passed, so a stricter count is 27/32, not 29/32.
+The disagreements lean one way. The judge passed three answers I failed: q05 (my reference is specific about the legal grounds and the bot's answer doesn't match it), q27 (the bot and the reference give different answers on the complaint system) and q29 (the reference says a micro company doesn't have to label ads under Article 26, the bot says it does). It was stricter than me on one, q39. So the judge is soft on correctness, mostly on exactly the Article 19 questions, and its 29/32 overstates the system. Using my grades where I graded and the judge's elsewhere, run 2 gets 26/32.
 
 | | Run 1 | Run 2 |
 |---|---|---|
 | Correct, answerable (judge) | 25/32 | 29/32 |
-| Correct, answerable (stricter, second grader on its 20) | n/a | 27/32 |
+| Correct, answerable (my grades where I graded, judge elsewhere) | n/a | 26/32 |
 | Unsupported answers (judge) | 0/40 | 2/40 |
 | Correct refusals (code, new check) | 8/8 | 7/8 |
 | Wrong refusals (code) | 2/32 | 1/32 |
@@ -183,31 +183,31 @@ Between the runs I changed five things, all picked after reading run 1's failure
 4. the code's refusal check, which now counts "the corpus does not cover" (or "state", "specify" and similar) anywhere in the answer instead of only at the start
 5. the served design, from article_routed to article (identical retrieval scores, so probably harmless)
 
-So run 2 is optimistic. I tuned on the test, and only fresh questions would show whether the gain is real. I also never reran run 2 unchanged, so I don't know how much a rerun moves the score by itself. And q24 was right in run 1 and became a wrong refusal in run 2, so at least one fix broke something. Rescored with the new refusal check, run 1 gets 8/8 refusals, so run 2 also got worse on q39: run 1 said the corpus can't settle "the public" and run 2 answered with its own reading.
+So run 2 is optimistic. I tuned on the test, and only fresh questions would show whether the gain is real. I also never reran run 2 unchanged, so I don't know how much a rerun moves the score by itself. And q24 was right in run 1 and became a wrong refusal in run 2, so at least one fix broke something. Rescored with the new refusal check, run 1 gets 8/8 refusals and run 2 gets 7/8. The one that moved is q39: run 1 said the corpus can't settle "the public", and run 2 gives its own reading of the definition. I graded run 2's version as acceptable, but the judge and the code didn't, so that one is a judgment call.
 
 ## Failures
 
-My hand classification of run 2, from reading each answer against the reference and the passages:
+Failed questions in run 2, using my grades where I graded and the judge's elsewhere, classified by reading each answer against the reference and the passages:
 
 | Cause | Count | Questions |
 |---|---|---|
-| Unsupported claim | 2 | q39 (answered an unanswerable question with its own reading of "the public"), q24 (a refusal that also claims ePrivacy is missing from the index, which is false) |
-| Wrong answer from the right passage | 3 | q04 (had GDPR Article 7 but only said withdrawal must be as easy as giving consent, and left out "at any time" and being told beforehand), q27 (skipped Article 20 entirely, and "Section 2" is wrong), q17 (the judge passed it, but it calls Section 3 "transparency obligations" and never says the hosting duties in Articles 16 and 17 still apply) |
-| Wrong refusal | 1 | q24 (DSA Article 10 was retrieved, and it still refused) |
-| Retrieval miss | 1 | q28 (searched once, never retrieved Article 19, so it told a micro company it "must" follow Article 28, which Article 19 exempts it from) |
+| Wrong answer from the right passage | 3 | q04 (had GDPR Article 7 but only said withdrawal must be as easy as giving consent, and left out "at any time" and being told beforehand), q05 (had Article 6 but doesn't match the reference on the grounds), q27 (skipped Article 20 and puts the exemption in "Section 2", which is wrong) |
+| Missed exemption | 1 | q29 (lists the Article 26 ad labels as a duty, when Article 19 exempts a micro company) |
+| Retrieval miss | 1 | q28 (searched once, never retrieved Article 19, so it told a micro company it "must" follow Article 28) |
+| Wrong refusal | 1 | q24 (DSA Article 10 was retrieved, and it still refused, while also claiming ePrivacy isn't in the index, which is false) |
 | Bad test question | 0 | |
 
-q24 is counted twice because it failed in two ways. On top of these, the second grader's notes point to smaller overstatements in answers the judge passed (q11, q13, q29, q33). Those don't change the conclusion of the answer, but a moderator reading "you must" where the law says "as appropriate" would act on a stronger duty than the one that exists.
+Six failures, and three of them (q27, q28, q29) are the same thing: the agent doesn't apply the micro enterprise exemption.
 
-The code's first guess called q37 an "unsupported claim", and I think that's wrong. The answer says the corpus doesn't specify a fixed number of hours and then gives DSA Article 6's "act expeditiously" with a citation, which is my reference answer, and both the judge and the second grader marked it correct. My refusal check looked for "does not cover", "does not state" and "does not say", so it missed "does not specify". That's a measurement bug, not an agent failure. I fixed the check and recomputed from the saved answers (no new model calls), and correct refusals went to 7/8. The new check is looser, though. An answer that says "does not cover" once and then answers anyway would pass, so I read the unanswerable answers by hand too.
+The code's first guess called q37 an "unsupported claim", and I think that's wrong. The answer says the corpus doesn't specify a fixed number of hours and then gives DSA Article 6's "act expeditiously" with a citation, which is my reference answer, and both the judge and I marked it correct. My refusal check looked for "does not cover", "does not state" and "does not say", so it missed "does not specify". That's a measurement bug, not an agent failure. I fixed the check and recomputed from the saved answers (no new model calls), and correct refusals went to 7/8. The new check is looser, though. An answer that says "does not cover" once and then answers anyway would pass, so I read the unanswerable answers by hand too.
 
-What I'd fix first is exemptions. Four of the seven multi questions (q27, q28, q29, q32) hinge on Article 19, plus q17, and q28 still missed it in run 2 because the agent searched once. I'd force a second search whenever a retrieved article sits in DSA Articles 20 to 28, and put the section number in the chunk header so "Section 3" is in the text and the model can't make up "Section 2". Second, I'd add a rule to keep the law's own qualifiers ("as appropriate", "where", "unless") word for word.
+What I'd fix first is exemptions. Four of the seven multi questions (q27, q28, q29, q32) hinge on Article 19, and three of them still failed in run 2. q28 missed it because the agent searched once. I'd force a second search whenever a retrieved article sits in DSA Articles 20 to 28, and put the section number in the chunk header so "Section 3" is in the text and the model can't make up "Section 2".
 
 ## Decision
 
-I'd let our moderators and devs rely on it for a first pass: which article applies to this situation and what does it say, with the citations right there to click. It's mostly right on single-article questions, though it sometimes states a duty more strongly than the law does, and it's good at saying when something isn't covered.
+I'd let our moderators and devs rely on it for a first pass: which article applies to this situation and what does it say, with the citations right there to click. It's mostly right on single-article questions (I failed one of the 13 single answers I graded), and it's good at saying when something isn't covered.
 
-I wouldn't let anyone act on it alone when the answer hinges on whether an exemption applies to us (Article 19 and friends). That's where it fails most, and where a wrong call hurts. q28 is the example: it told us we "must" follow Article 28 when we're exempt. I also wouldn't use it for a regulator letter, a police order or a court order without a lawyer, and the agent already says so in those cases. And because the judge is lenient on support, whoever reads an answer should click the citation before acting on a "you must".
+I wouldn't let anyone act on it alone when the answer hinges on whether an exemption applies to us (Article 19 and friends). That's where it fails most, and where a wrong call hurts. q28 is the example: it told us we "must" follow Article 28 when we're exempt. I also wouldn't use it for a regulator letter, a police order or a court order without a lawyer, and the agent already says so in those cases. And whoever reads an answer should click the citation before acting on a "you must".
 
 The safeguards I'd keep:
 
@@ -216,7 +216,7 @@ The safeguards I'd keep:
 - refusal when the corpus doesn't cover something
 - a weekly look at a sample of answers by me
 
-Before trusting the run 2 number I'd want 20 or so fresh questions written after the fixes, and my own grades in.
+Before trusting the run 2 number I'd want 20 or so fresh questions written after the fixes.
 
 Cost per question in run 2: 5,354 input and 143 output tokens and 1.4 tool calls on average. That's up from 4,235 tokens and 1.2 calls in run 1, probably because of the longer AGENTS.md and more searches. Mean 7.2 seconds, worst 45.5 seconds (that one waited on rate limits). On the free tier that's €0 per question. I haven't priced the paid tier here, so I won't put a number on it.
 
@@ -226,8 +226,6 @@ I used Claude (Anthropic) throughout. It wrote the code (`index.py`, `retrieval.
 
 For the test set, I gave an AI agent a prompt with talks.' features and my criteria, it drafted 45 candidates, and a second agent checked each against the law. I set the criteria, cut the dating questions and approved the final 40.
 
-Claude also ran an independent AI grading pass, labelled as such above, and drafted this report from the eval files.
+Claude also drafted this report from the eval files, and I edited it. The 20 human grades are my own.
 
 The decisions are mine: the use case and corpus, indexing articles only, serving plain article chunks, refusing over guessing, the rubric, the fixes after run 1 and the ship decision.
-
-My 20 human grades are listed as pending above until they're in.
