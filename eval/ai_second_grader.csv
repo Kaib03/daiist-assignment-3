@@ -1,0 +1,21 @@
+id,correct,supported,notes
+q01,1,1,Grounds of Art 17(1) and 17(3) exceptions stated; Art 17(2) duty also in chunk 0032
+q03,1,1,17-year-olds can consent (16+ threshold); omits below-16 rule but question is about 17; all claims in Art 8 chunk
+q05,1,1,All six Art 6(1) grounds incl. legitimate-interests balancing; matches chunk 0009
+q07,1,1,Not visible by default; Art 25(2) default-minimisation and indefinite-audience rule quoted faithfully
+q09,1,1,Encryption exception (Art 34(3)(a)) stated; no-high-risk and subsequent-measures points follow from Art 34(1)/(3)(b)
+q11,1,0,Correct substance (risk-appropriate; encryption as appropriate) but 'you must also ensure ongoing confidentiality integrity availability and resilience' turns Art 32(1)(b) 'as appropriate ... the ability to ensure' into an absolute duty
+q13,1,0,No general monitoring correct; but 'you must act expeditiously to remove' recasts Art 6 liability-exemption condition as a standalone obligation
+q15,1,1,All Art 17(3) elements plus 17(2) scope; matches chunks 0026/0027
+q17,0,0,Calls Section 3 'online platform transparency obligations' (it covers Arts 20-28 platform duties); does not say what Art 24(3) still requires or that hosting duties (Arts 16/17) remain; 'Section 3 of Chapter III' and its content not in chunk (chunk only says 'This Section')
+q19,1,1,Single point of contact must not rely solely on automated tools; matches Art 12(1)
+q21,1,1,DSC of establishment awards status on application with the conditions; Commission database in Art 22(5); omits Art 19 point but core question answered
+q23,1,1,Inform issuing authority and the user with reasons/redress/territorial scope; matches Art 9(1) and 9(5)
+q25,1,1,Prior consent required; own-similar-products exception does not cover partner event; matches Art 13(1)-(2) ePrivacy
+q27,0,0,Multi: nothing on Art 20 (no Art 20 chunk cited); says exemption is from 'Section 2' (wrong and not in chunk); chunk does not say the complaint system is in the exempted Section; VLOP caveat missing
+q29,1,0,Correct conclusion and lists main Art 26 items; but the claim that Art 26 sits in 'Section 3' and is covered by Art 19's exemption is not in either cited chunk (Art 19 chunk only says 'This Section')
+q31,1,1,Notice gives actual knowledge without detailed legal examination; exemption kept only if expeditious action; matches Arts 16(3) and 6(1)-(2)
+q33,1,0,Says corpus does not cover a terrorist-content deadline (ok) but then claims the corpus requires 'to act without undue delay upon receiving an order'; Art 9(1) only requires informing the authority without undue delay of the effect given
+q35,1,1,Says corpus does not cover AEPD amounts; cites Art 83(4) maximum for Arts 25-39 correctly
+q37,1,1,No fixed hours in corpus; points to expeditious action under Art 6(1); fine for unanswerable
+q39,0,0,Unanswerable but answers anyway: asserts verified-student gating does not remove it from 'public' if pool is 'potentially unlimited or not bound by a common private circle'; that reasoning is not in the Art 3(k) chunk and it never says the corpus cannot settle the question
